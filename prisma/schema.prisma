@@ -1,0 +1,231 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model OccupationAreaProfile {
+  id              String          @id @default(uuid())
+  profileId       String          @unique
+  occupation      Occupation
+  portfolio       String?         @unique
+  workValue       Float
+  amountChargedBy AmountChargedBy
+  createdAt       DateTime        @default(now())
+  linkedin        String?         @unique
+  updatedAt       DateTime
+  birthDate       String
+  document        String
+  Profile         Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Profile {
+  id                 String                 @id
+  name               String?
+  lastName           String?
+  email              String?                @unique(map: "Profile.email_unique")
+  nickName           String?
+  role               Role                   @default(USER)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime
+  AddressProfile     AddressProfile?
+  BusinessProfile    BusinessProfile?
+  OperationProfile   OccupationAreaProfile?
+  ProfileConections  ProfileConections[]
+  ProfilePosts       ProfilePosts[]
+  ProfilePostsLikes  ProfilePostsLikes[]
+  ProfilePostsShared ProfilePostsShared[]
+  ProfileSites       ProfileSites[]
+}
+
+model AddressProfile {
+  id           String   @id
+  street       String
+  neighborhood String
+  number       String
+  city         String
+  UF           UF
+  complement   String
+  profileId    String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  Profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model BusinessProfile {
+  id           String             @id
+  fantasyName  String
+  socialReason String             @unique
+  document     String             @unique
+  portfolio    String?            @unique
+  linkedin     String?            @unique
+  occupation   OccupationBusiness
+  profileId    String             @unique
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime
+  Profile      Profile            @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model LinkMetrics {
+  id                  String            @id
+  DA                  Int
+  PA                  Int
+  spamScore           Int
+  niche               String
+  traffic             Float
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime
+  profileSitesLinksId String            @unique
+  ProfileSitesLinks   ProfileSitesLinks @relation(fields: [profileSitesLinksId], references: [id], onDelete: Cascade)
+}
+
+model ProfileConections {
+  profileId   String
+  conectionId String
+  Profile     Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, conectionId])
+  @@unique([profileId, conectionId])
+  @@index([profileId, conectionId])
+}
+
+model ProfilePosts {
+  id                 String               @id
+  profileId          String
+  content            String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  Profile            Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  ProfilePostsLikes  ProfilePostsLikes[]
+  ProfilePostsShared ProfilePostsShared[]
+}
+
+model ProfilePostsLikes {
+  profileId      String
+  profilePostsId String
+  Profile        Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  ProfilePosts   ProfilePosts @relation(fields: [profilePostsId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, profilePostsId])
+  @@unique([profileId, profilePostsId])
+  @@index([profileId, profilePostsId])
+}
+
+model ProfilePostsShared {
+  profileId      String
+  profilePostsId String
+  Profile        Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  ProfilePosts   ProfilePosts @relation(fields: [profilePostsId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, profilePostsId])
+  @@unique([profileId, profilePostsId])
+  @@index([profileId, profilePostsId])
+}
+
+model ProfileSites {
+  id                  String               @id
+  url                 String               @unique
+  profileId           String
+  niche               String
+  tradeLink           Boolean
+  tradePost           Boolean
+  salesLink           Boolean
+  DA                  Int
+  PA                  Int
+  traffic             Float
+  backlinks           Int
+  plagiarism          Int
+  spamScore           Int
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime
+  mainKeyord          String
+  keywords            String[]
+  Profile             Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  ProfileSitesContact ProfileSitesContact?
+  ProfileSitesLinks   ProfileSitesLinks[]
+  SiteMetrics         SiteMetrics?
+}
+
+model ProfileSitesContact {
+  id             String       @id
+  email          String
+  phone          String
+  link           String
+  profileSitesId String       @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  ProfileSites   ProfileSites @relation(fields: [profileSitesId], references: [id], onDelete: Cascade)
+}
+
+model ProfileSitesLinks {
+  id            String       @id
+  profileSiteId String
+  url           String
+  niche         String
+  backlinks     Int
+  DA            String
+  PA            String
+  traffic       String
+  plagiarism    String
+  spamScore     Int
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime
+  mainKeyord    String
+  salesLink     Boolean
+  tradeLink     Boolean
+  keywords      String[]
+  ProfileSites  ProfileSites @relation(fields: [profileSiteId], references: [id], onDelete: Cascade)
+  LinkMetrics   LinkMetrics?
+}
+
+model SiteMetrics {
+  id             String       @id
+  profileSitesId String       @unique
+  DA             Int
+  PA             Int
+  spamScore      Int
+  niche          String
+  traffic        Float
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  ProfileSites   ProfileSites @relation(fields: [profileSitesId], references: [id], onDelete: Cascade)
+}
+
+enum AmountChargedBy {
+  HOUR
+  DAY
+  MOUNTH
+  WORD
+}
+
+enum Occupation {
+  REDACTOR
+  PROGRAMMER
+  SEO_ESPECIALIST
+  SITES_OPTIMIZATION
+  MARKETING
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OccupationBusiness {
+  MARKETING_AGENCY
+  SOFTWARE_AGENCY
+  SEO_AGENCY
+  DESIGN_AGENCY
+}
+
+enum UF {
+  SP
+  RJ
+  SC
+  MG
+  AM
+}
