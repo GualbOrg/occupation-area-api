@@ -8,33 +8,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model OccupationAreaProfile {
-  id              String          @id @default(uuid())
-  profileId       String          @unique
-  occupation      Occupation
-  portfolio       String?         @unique
-  workValue       Float
-  amountChargedBy AmountChargedBy
-  createdAt       DateTime        @default(now())
-  linkedin        String?         @unique
-  updatedAt       DateTime
-  birthDate       String
-  document        String
-  Profile         Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
-}
-
 model Profile {
-  id                 String                 @id
-  name               String?
-  lastName           String?
-  email              String?                @unique(map: "Profile.email_unique")
-  nickName           String?
-  role               Role                   @default(USER)
-  createdAt          DateTime               @default(now())
+  id                 String               @id
+  name               String               @db.VarChar(50)
+  lastName           String               @db.VarChar(50)
+  email              String               @unique(map: "Profile.email_unique")
+  nickName           String               @db.VarChar(30)
+  role               Role                 @default(USER)
+  createdAt          DateTime             @default(now())
   updatedAt          DateTime
   AddressProfile     AddressProfile?
   BusinessProfile    BusinessProfile?
-  OperationProfile   OccupationAreaProfile?
+  CompanyProfile     CompanyProfile?
   ProfileConections  ProfileConections[]
   ProfilePosts       ProfilePosts[]
   ProfilePostsLikes  ProfilePostsLikes[]
@@ -44,12 +29,12 @@ model Profile {
 
 model AddressProfile {
   id           String   @id
-  street       String
-  neighborhood String
-  number       String
-  city         String
+  street       String   @db.VarChar(100)
+  neighborhood String   @db.VarChar(100)
+  number       String   @db.VarChar(50)
+  city         String   @db.VarChar(100)
   UF           UF
-  complement   String
+  complement   String   @db.VarChar(30)
   profileId    String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime
@@ -57,17 +42,19 @@ model AddressProfile {
 }
 
 model BusinessProfile {
-  id           String             @id
-  fantasyName  String
-  socialReason String             @unique
-  document     String             @unique
-  portfolio    String?            @unique
-  linkedin     String?            @unique
-  occupation   OccupationBusiness
-  profileId    String             @unique
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime
-  Profile      Profile            @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id                            String                         @id
+  portfolio                     String                         @unique @db.VarChar(150)
+  linkedin                      String                         @unique @db.VarChar(150)
+  profileId                     String                         @unique
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime
+  phoneNumber                   String                         @unique @db.VarChar(15)
+  Profile                       Profile                        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  BusinessProfileActuationAreas BusinessProfileActuationAreas?
+
+  @@index([linkedin])
+  @@index([phoneNumber])
+  @@index([profileId])
 }
 
 model LinkMetrics {
@@ -195,6 +182,59 @@ model SiteMetrics {
   ProfileSites   ProfileSites @relation(fields: [profileSitesId], references: [id], onDelete: Cascade)
 }
 
+model ActuationAreas {
+  id                            ActuactionAreasEnum             @id
+  description                   String                          @db.VarChar(150)
+  createdAt                     DateTime                        @default(now())
+  updatedAt                     DateTime                        @default(now())
+  BusinessProfileActuationAreas BusinessProfileActuationAreas[]
+
+  @@index([description])
+}
+
+model BusinessProfileActuationAreas {
+  id                String              @id
+  businessProfileId String              @unique
+  actuationAreas    ActuactionAreasEnum
+  workValue         Float
+  amountChargedBy   AmountChargedBy
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime
+  ActuationAreas    ActuationAreas      @relation(fields: [actuationAreas], references: [id], onDelete: Cascade)
+  BusinessProfile   BusinessProfile     @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([businessProfileId, actuationAreas])
+  @@index([actuationAreas])
+}
+
+model CompanyProfile {
+  id              String            @id
+  profileId       String            @unique
+  companySectorId CompanySectorEnum
+  site            String            @unique @db.VarChar(300)
+  fantasyName     String            @unique @db.VarChar(300)
+  linkedin        String            @unique @db.VarChar(300)
+  phoneNumber     String            @unique @db.VarChar(15)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  CompanySector   CompanySector     @relation(fields: [companySectorId], references: [id], onDelete: Cascade)
+  Profile         Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, companySectorId])
+  @@index([companySectorId])
+}
+
+model CompanySector {
+  id             CompanySectorEnum @id
+  name           String            @unique
+  description    String            @db.VarChar(150)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime
+  CompanyProfile CompanyProfile[]
+
+  @@index([name])
+}
+
 enum AmountChargedBy {
   HOUR
   DAY
@@ -202,24 +242,9 @@ enum AmountChargedBy {
   WORD
 }
 
-enum Occupation {
-  REDACTOR
-  PROGRAMMER
-  SEO_ESPECIALIST
-  SITES_OPTIMIZATION
-  MARKETING
-}
-
 enum Role {
   USER
   ADMIN
-}
-
-enum OccupationBusiness {
-  MARKETING_AGENCY
-  SOFTWARE_AGENCY
-  SEO_AGENCY
-  DESIGN_AGENCY
 }
 
 enum UF {
@@ -228,4 +253,22 @@ enum UF {
   SC
   MG
   AM
+}
+
+enum ActuactionAreasEnum {
+  REDACTOR
+  PROGRAMMER
+  SEO_ESPECIALIST
+  SITES_OPTIMIZATION
+  MARKETING
+  DESIGNER
+  DEVOPS
+  VIDEO_MAKER
+}
+
+enum CompanySectorEnum {
+  MARKETING_AGENCY
+  SOFTWARE_AGENCY
+  SEO_AGENCY
+  DESIGN_AGENCY
 }

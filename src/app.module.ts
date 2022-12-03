@@ -4,8 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AuthModule } from './config/auth/auth.module';
 import { formatErrorConfig } from './config/exception/format-error.config'
-import { ProfileDto } from './lambdas/occupation-area-profile/model/profile.dto';
-import { OccupationAreaProfileModule } from './lambdas/occupation-area-profile/occupation-area-profile.module';
+import { ProfileDto } from './lambdas/business-profile/model/profile.dto';
+import { BusinessProfileModule } from './lambdas/business-profile/business-profile.module';
 
 type RequestType = { req: Request, res: Response }
 @Module({
@@ -21,7 +21,7 @@ type RequestType = { req: Request, res: Response }
       },
     }),
     AuthModule,
-    OccupationAreaProfileModule
+    BusinessProfileModule
   ]
 })
 export class AppModule { }
