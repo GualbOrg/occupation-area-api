@@ -1,4 +1,4 @@
-# Serverless, AWS, NestJS, GraphQL and DynamoDB starter
+# Serverless, AWS, NestJS, GraphQL and PRISMA POSTGRES starter
 
 <p>
 <a href="https://github.com/hardyscc/aws-nestjs-starter/actions"><img src="https://github.com/hardyscc/aws-nestjs-starter/workflows/Node.js%20CI/badge.svg" alt="CI"></a>
@@ -17,11 +17,11 @@ A starter project that makes creating a deployable AWS Serverless project extrem
 ## Technologies
 
 - [AWS Lambda](https://aws.amazon.com/lambda)
-- [AWS DynamoDB](https://aws.amazon.com/dynamodb)
+- [POSTGRES]
 - [Serverless](https://serverless.com/framework/docs/providers/aws/)
 - [NestJS](https://docs.nestjs.com/)
 - [NestJS GraphQL](https://docs.nestjs.com/graphql/quick-start)
-- [NestJS Dynamoose](https://github.com/hardyscc/nestjs-dynamoose)
+- [NestJS PRISMA]
 
 ## Usage
 
